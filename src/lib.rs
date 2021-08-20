@@ -7,7 +7,7 @@
 mod bind;
 
 use bitflags::bitflags;
-use rich_sdl2_rust::{Sdl, SdlVersion};
+use rich_sdl2_rust::{Result, SdlError, SdlVersion};
 use static_assertions::assert_not_impl_all;
 use std::{cell::Cell, marker::PhantomData};
 
@@ -37,14 +37,15 @@ pub struct Mix {
 assert_not_impl_all!(Mix: Send, Sync);
 
 impl Mix {
-    /// Constructs a root controller.
-    pub fn new(flag: FormatFlag) -> Self {
+    /// Constructs a root controller, or `Err` if the format is not supported.
+    pub fn new(flag: FormatFlag) -> Result<Self> {
         let ret = unsafe { bind::Mix_Init(flag.bits as _) };
         if !flag.contains(FormatFlag::from_bits_truncate(ret as _)) {
-            Sdl::error_then_panic("mixer init");
-        }
-        Self {
-            _phantom: PhantomData,
+            Err(SdlError::UnsupportedFeature)
+        } else {
+            Ok(Self {
+                _phantom: PhantomData,
+            })
         }
     }
 
