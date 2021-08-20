@@ -9,6 +9,8 @@ use std::{
 
 use crate::{bind, device::MixDevice};
 
+pub mod channel;
+
 /// A chunk buffer of the audio data.
 pub struct MixChunk<'device> {
     ptr: NonNull<bind::Mix_Chunk>,
