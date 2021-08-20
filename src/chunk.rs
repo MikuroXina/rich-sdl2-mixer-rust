@@ -39,6 +39,22 @@ impl<'device> MixChunk<'device> {
             })
         }
     }
+
+    /// Constructs a chunk from the wave file bytes.
+    ///
+    /// # Safety
+    ///
+    /// `buf` must be a valid WAVE format file bytes. Otherwise the Undefined Behavior occurs.
+    pub unsafe fn from_file_bytes_unchecked(
+        _device: &'device MixDevice<'device>,
+        file: &[u8],
+    ) -> Self {
+        let ptr = bind::Mix_QuickLoad_WAV(file.as_ptr() as *mut _);
+        Self {
+            ptr: NonNull::new(ptr).unwrap(),
+            _phantom: PhantomData,
+        }
+    }
 }
 
 impl Drop for MixChunk<'_> {
