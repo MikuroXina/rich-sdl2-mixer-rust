@@ -6,6 +6,10 @@ use std::{marker::PhantomData, os::raw::c_int};
 use super::MixChunk;
 use crate::{bind, device::MixDevice};
 
+pub use pause::*;
+
+mod pause;
+
 /// Loops on playing in [`PlayOptions`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PlayLoops {
@@ -114,5 +118,10 @@ impl<'device> Channel<'device> {
         } else {
             Ok(Self(id, PhantomData))
         }
+    }
+
+    /// Pauses playing and returns the [`Pauser`], or `None` if it is free.
+    pub fn pause(&'device mut self) -> Option<Pauser<'device>> {
+        Pauser::pause(self)
     }
 }
