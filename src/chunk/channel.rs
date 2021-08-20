@@ -66,6 +66,16 @@ impl<'device> Channel<'device> {
         Self(-1, PhantomData)
     }
 
+    /// Returns the output volume of the channel. The volume is in `0..=128`.
+    pub fn volume(&self) -> u32 {
+        unsafe { bind::Mix_Volume(self.0, -1) as _ }
+    }
+
+    /// Sets the output volume of the channel. The volume is clamped to `0..=128`.
+    pub fn set_volume(&self, volume: u32) {
+        let _ = unsafe { bind::Mix_Volume(self.0, volume.clamp(0, 128) as _) };
+    }
+
     /// Starts to play a chunk.
     pub fn play(self, chunk: &MixChunk, options: PlayOptions) -> Result<Self> {
         let id = unsafe {
