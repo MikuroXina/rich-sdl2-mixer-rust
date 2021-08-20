@@ -71,6 +71,16 @@ impl<'device> MixChunk<'device> {
             _phantom: PhantomData,
         }
     }
+
+    /// Returns the output volume of the chunk.
+    pub fn volume(&self) -> u32 {
+        unsafe { bind::Mix_VolumeChunk(self.ptr.as_ptr(), -1) as _ }
+    }
+
+    /// Sets the output volume of the chunk.
+    pub fn set_volume(&self, volume: u32) {
+        let _ = unsafe { bind::Mix_VolumeChunk(self.ptr.as_ptr(), volume as _) };
+    }
 }
 
 impl Drop for MixChunk<'_> {
