@@ -124,4 +124,14 @@ impl<'device> Channel<'device> {
     pub fn pause(&'device mut self) -> Option<Pauser<'device>> {
         Pauser::pause(self)
     }
+
+    /// Halts playing on the channel.
+    pub fn halt(&self) {
+        let _ = unsafe { bind::Mix_HaltChannel(self.0) };
+    }
+
+    /// Halts all the playing channel.
+    pub fn halt_all(_device: &'device MixDevice<'device>) {
+        let _ = unsafe { bind::Mix_HaltChannel(-1) };
+    }
 }
