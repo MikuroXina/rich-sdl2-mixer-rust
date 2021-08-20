@@ -134,4 +134,14 @@ impl<'device> Channel<'device> {
     pub fn halt_all(_device: &'device MixDevice<'device>) {
         let _ = unsafe { bind::Mix_HaltChannel(-1) };
     }
+
+    /// Fade out playing on the channel in milliseconds. And returns the numbers of channels that is fading out.
+    pub fn fade_out(&self, fade_out: u32) -> usize {
+        unsafe { bind::Mix_FadeOutChannel(self.0, fade_out as _) as _ }
+    }
+
+    /// Fade out all the playing channel in milliseconds. And returns the numbers of channels that is fading out.
+    pub fn fade_out_all(_device: &'device MixDevice<'device>, fade_out: u32) -> usize {
+        unsafe { bind::Mix_FadeOutChannel(-1, fade_out as _) as _ }
+    }
 }
