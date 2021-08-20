@@ -149,4 +149,9 @@ impl<'device> Channel<'device> {
     pub fn playing_channels(_device: &'device MixDevice<'device>) -> usize {
         unsafe { bind::Mix_Playing(-1) as _ }
     }
+
+    /// Returns whether the channel is playing.
+    pub fn is_playing(&self) -> bool {
+        unsafe { bind::Mix_Playing(self.0) != 0 }
+    }
 }
