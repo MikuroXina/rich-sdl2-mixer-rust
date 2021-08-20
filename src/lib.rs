@@ -5,6 +5,7 @@
 #![warn(missing_docs)]
 
 mod bind;
+pub mod chunk;
 pub mod device;
 
 use bitflags::bitflags;
