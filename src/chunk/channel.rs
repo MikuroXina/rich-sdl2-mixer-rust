@@ -144,4 +144,9 @@ impl<'device> Channel<'device> {
     pub fn fade_out_all(_device: &'device MixDevice<'device>, fade_out: u32) -> usize {
         unsafe { bind::Mix_FadeOutChannel(-1, fade_out as _) as _ }
     }
+
+    /// Returns the numbers of playing channels.
+    pub fn playing_channels(_device: &'device MixDevice<'device>) -> usize {
+        unsafe { bind::Mix_Playing(-1) as _ }
+    }
 }
