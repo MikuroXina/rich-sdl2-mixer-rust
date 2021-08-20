@@ -5,6 +5,7 @@
 #![warn(missing_docs)]
 
 mod bind;
+pub mod device;
 
 use bitflags::bitflags;
 use rich_sdl2_rust::{Result, SdlError, SdlVersion};
