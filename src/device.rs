@@ -1,8 +1,7 @@
 //! Audio specifications for SDL2_mixer.
 
-use std::marker::PhantomData;
-
 use rich_sdl2_rust::{audio::format::AudioFormat, Result, Sdl, SdlError};
+use std::{borrow::Cow, ffi::CStr, marker::PhantomData};
 
 use crate::{bind, Mix};
 
@@ -115,6 +114,17 @@ impl MixDevice<'_> {
             format: format.into(),
             channels: channels as _,
         }
+    }
+
+    /// Returns the decoder names for the mix chunk.
+    pub fn chunk_decoders(&self) -> Vec<Cow<str>> {
+        let num = unsafe { bind::Mix_GetNumChunkDecoders() };
+        (0..num)
+            .map(|index| {
+                let cstr = unsafe { CStr::from_ptr(bind::Mix_GetChunkDecoder(index)) };
+                cstr.to_string_lossy()
+            })
+            .collect()
     }
 }
 
