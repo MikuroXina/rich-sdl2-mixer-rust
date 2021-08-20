@@ -1,7 +1,7 @@
 //! Channels to play a [`MixChunk`].
 
 use rich_sdl2_rust::{Result, Sdl, SdlError};
-use std::{marker::PhantomData, os::raw::c_int};
+use std::{marker::PhantomData, os::raw::c_int, ptr::NonNull};
 
 use super::MixChunk;
 use crate::{bind, device::MixDevice};
@@ -153,5 +153,17 @@ impl<'device> Channel<'device> {
     /// Returns whether the channel is playing.
     pub fn is_playing(&self) -> bool {
         unsafe { bind::Mix_Playing(self.0) != 0 }
+    }
+
+    /// Returns the playing chunk if exists.
+    pub fn playing_chunk(&self) -> Option<MixChunk> {
+        if self.0 == -1 {
+            return None;
+        }
+        let ptr = unsafe { bind::Mix_GetChunk(self.0) };
+        (!ptr.is_null()).then(|| MixChunk {
+            ptr: NonNull::new(ptr).unwrap(),
+            _phantom: PhantomData,
+        })
     }
 }
