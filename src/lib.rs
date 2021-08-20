@@ -7,7 +7,7 @@
 mod bind;
 
 use bitflags::bitflags;
-use rich_sdl2_rust::Sdl;
+use rich_sdl2_rust::{Sdl, SdlVersion};
 use static_assertions::assert_not_impl_all;
 use std::{cell::Cell, marker::PhantomData};
 
@@ -45,6 +45,16 @@ impl Mix {
         }
         Self {
             _phantom: PhantomData,
+        }
+    }
+
+    /// Returns the library version of SDL2_mixer.
+    pub fn version() -> SdlVersion {
+        let raw = unsafe { &*bind::Mix_Linked_Version() };
+        SdlVersion {
+            major: raw.major,
+            minor: raw.minor,
+            patch: raw.patch,
         }
     }
 }
