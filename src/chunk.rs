@@ -55,6 +55,22 @@ impl<'device> MixChunk<'device> {
             _phantom: PhantomData,
         }
     }
+
+    /// Constructs a chunk from the raw wave buffer bytes.
+    ///
+    /// # Safety
+    ///
+    /// `buf` must be a valid WAVE format buffer bytes. Otherwise the Undefined Behavior occurs.
+    pub unsafe fn from_buf_unchecked(
+        _device: &'device MixDevice<'device>,
+        buf: &'device mut [u8],
+    ) -> Self {
+        let ptr = bind::Mix_QuickLoad_RAW(buf.as_mut_ptr(), buf.len() as _);
+        Self {
+            ptr: NonNull::new(ptr).unwrap(),
+            _phantom: PhantomData,
+        }
+    }
 }
 
 impl Drop for MixChunk<'_> {
