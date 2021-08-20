@@ -74,14 +74,14 @@ impl<'device> MixChunk<'device> {
         }
     }
 
-    /// Returns the output volume of the chunk.
+    /// Returns the output volume of the chunk. The volume is in `0..=128`.
     pub fn volume(&self) -> u32 {
         unsafe { bind::Mix_VolumeChunk(self.ptr.as_ptr(), -1) as _ }
     }
 
-    /// Sets the output volume of the chunk.
+    /// Sets the output volume of the chunk. The volume is clamped to `0..=128`.
     pub fn set_volume(&self, volume: u32) {
-        let _ = unsafe { bind::Mix_VolumeChunk(self.ptr.as_ptr(), volume as _) };
+        let _ = unsafe { bind::Mix_VolumeChunk(self.ptr.as_ptr(), volume.clamp(0, 128) as _) };
     }
 }
 
