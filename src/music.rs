@@ -13,6 +13,10 @@ pub struct MixMusic<'device> {
 
 impl<'device> MixMusic<'device> {
     /// Constructs a music from the file, or `Err` on failure.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `file_name` is empty.
     pub fn new(_device: &'device MixDevice<'device>, file_name: &str) -> Result<Self> {
         let cstr = CString::new(file_name).expect("file_name must not be empty");
         let ptr = unsafe { bind::Mix_LoadMUS(cstr.as_ptr()) };
