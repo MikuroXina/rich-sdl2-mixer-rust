@@ -28,7 +28,7 @@ impl PlayLoops {
         match self {
             PlayLoops::Infinite => -1,
             PlayLoops::OneShot => 0,
-            PlayLoops::Times(n) => (n - 1) as _,
+            PlayLoops::Times(n) => n.saturating_sub(1) as _,
         }
     }
 }
