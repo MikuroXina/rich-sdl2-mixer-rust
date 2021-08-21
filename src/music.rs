@@ -5,6 +5,8 @@ use std::{ffi::CString, marker::PhantomData, ptr::NonNull};
 
 use crate::{bind, device::MixDevice};
 
+pub mod ty;
+
 /// A music buffer of the audio data.
 pub struct MixMusic<'device> {
     ptr: NonNull<bind::Mix_Music>,
