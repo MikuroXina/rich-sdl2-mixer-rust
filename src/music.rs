@@ -42,6 +42,12 @@ impl<'device> MixMusic<'device> {
 
     /// Constructs a music from the file with the custom player command, or `Err` on failure.
     ///
+    /// The command must handle the
+    /// signals emitted by the SDL2_mixer:
+    /// - On stop: `SIGTERM` signal
+    /// - On pause: `SIGSTOP` signal
+    /// - On unpause: `SIGCONT` signal
+    ///
     /// # Panics
     ///
     /// Panics if `file_name` or `command` is empty.
