@@ -54,6 +54,18 @@ impl<'device> ChannelGroup<'device> {
         (0 <= channel).then(|| Channel(channel, PhantomData))
     }
 
+    /// Returns the oldest playing channel in the group.
+    pub fn oldest_playing(&self) -> Option<Channel> {
+        let oldest = unsafe { bind::Mix_GroupOldest(self.group_id) as _ };
+        (0 <= oldest).then(|| Channel(oldest, PhantomData))
+    }
+
+    /// Returns the newest playing channel in the group.
+    pub fn newest_playing(&self) -> Option<Channel> {
+        let newest = unsafe { bind::Mix_GroupNewer(self.group_id) as _ };
+        (0 <= newest).then(|| Channel(newest, PhantomData))
+    }
+
     /// Halts all the playing channel.
     pub fn halt_all(&self) {
         let _ = unsafe { bind::Mix_HaltGroup(self.group_id) };
