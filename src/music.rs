@@ -87,6 +87,17 @@ impl<'device> MixMusic<'device> {
             Ok(())
         }
     }
+
+    /// Sets the music position in seconds, or `Err` on failure.
+    pub fn set_pos(&self, pos: f64) -> Result<()> {
+        let pos = self.music_type().convert_pos(pos);
+        let ret = unsafe { bind::Mix_SetMusicPosition(pos) };
+        if ret == -1 {
+            Err(SdlError::Others { msg: Sdl::error() })
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl Drop for MixMusic<'_> {
