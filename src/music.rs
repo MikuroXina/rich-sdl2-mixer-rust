@@ -126,6 +126,21 @@ impl<'device> MixMusic<'device> {
     pub fn pause(&'device mut self) -> Pauser<'device> {
         Pauser::pause(self)
     }
+
+    /// Halts the music.
+    pub fn halt(&self) {
+        let _ = unsafe { bind::Mix_HaltMusic() };
+    }
+
+    /// Halts the music with fade-out in milliseconds.
+    pub fn fade_out(&self, fade_out: u32) -> Result<()> {
+        let ret = unsafe { bind::Mix_FadeOutMusic(fade_out as _) };
+        if ret == 0 {
+            Err(SdlError::Others { msg: Sdl::error() })
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl Drop for MixMusic<'_> {
