@@ -127,6 +127,17 @@ impl MixDevice<'_> {
             .collect()
     }
 
+    /// Returns the decoder names for the mix music.
+    pub fn music_decoders(&self) -> Vec<Cow<str>> {
+        let num = unsafe { bind::Mix_GetNumMusicDecoders() };
+        (0..num)
+            .map(|index| {
+                let cstr = unsafe { CStr::from_ptr(bind::Mix_GetMusicDecoder(index)) };
+                cstr.to_string_lossy()
+            })
+            .collect()
+    }
+
     /// Returns the numbers of playing channels.
     pub fn playing_channels(&self) -> usize {
         unsafe { bind::Mix_Playing(-1) as _ }

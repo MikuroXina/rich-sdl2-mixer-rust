@@ -7,6 +7,7 @@
 mod bind;
 pub mod chunk;
 pub mod device;
+pub mod music;
 
 use bitflags::bitflags;
 use rich_sdl2_rust::{Result, SdlError, SdlVersion};
