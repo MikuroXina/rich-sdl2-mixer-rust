@@ -10,6 +10,17 @@ pub mod custom;
 pub mod pause;
 pub mod ty;
 
+/// A fading state of the music.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FadingState {
+    /// A music is not fading.
+    None,
+    /// A music is fading out.
+    FadingOut,
+    /// A music is fading in.
+    FadingIn,
+}
+
 /// A music buffer of the audio data.
 pub struct MixMusic<'device> {
     ptr: NonNull<bind::Mix_Music>,
@@ -145,6 +156,16 @@ impl<'device> MixMusic<'device> {
     /// Returns whether the music is playing.
     pub fn is_playing(&self) -> bool {
         unsafe { bind::Mix_PlayingMusic() == 1 }
+    }
+
+    /// Returns the fading state of the music.
+    pub fn fading_state(&self) -> FadingState {
+        match unsafe { bind::Mix_FadingMusic() } {
+            bind::Mix_Fading_MIX_NO_FADING => FadingState::None,
+            bind::Mix_Fading_MIX_FADING_OUT => FadingState::FadingOut,
+            bind::Mix_Fading_MIX_FADING_IN => FadingState::FadingIn,
+            _ => unreachable!(),
+        }
     }
 }
 
