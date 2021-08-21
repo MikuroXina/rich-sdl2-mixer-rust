@@ -5,6 +5,8 @@ use std::{ffi::c_void, os::raw::c_int};
 use super::Channel;
 use crate::bind;
 
+pub mod lib;
+
 /// An effect to process the audio buffer in the channel.
 pub type Effect = Box<dyn FnMut(&mut [u8])>;
 
