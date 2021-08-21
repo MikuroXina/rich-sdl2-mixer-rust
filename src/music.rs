@@ -3,6 +3,7 @@
 use rich_sdl2_rust::{Result, Sdl, SdlError};
 use std::{ffi::CString, marker::PhantomData, ptr::NonNull};
 
+use self::ty::MusicType;
 use crate::{bind, device::MixDevice};
 
 pub mod ty;
@@ -30,6 +31,12 @@ impl<'device> MixMusic<'device> {
                 _phantom: PhantomData,
             })
         }
+    }
+
+    /// Returns the type of the music.
+    pub fn music_type(&self) -> MusicType {
+        let raw = unsafe { bind::Mix_GetMusicType(self.ptr.as_ptr()) };
+        MusicType::from_raw(raw)
     }
 
     /// Constructs a music from the file with the custom player command, or `Err` on failure.
