@@ -3,7 +3,7 @@
 use rich_sdl2_rust::{audio::format::AudioFormat, Result, Sdl, SdlError};
 use std::{borrow::Cow, ffi::CStr, marker::PhantomData};
 
-use crate::{bind, Mix};
+use crate::{bind, chunk::channel::ChannelGroup, Mix};
 
 /// A builder for [`MixDevice`].
 #[derive(Debug, Clone)]
@@ -130,6 +130,11 @@ impl MixDevice<'_> {
     /// Returns the numbers of playing channels.
     pub fn playing_channels(&self) -> usize {
         unsafe { bind::Mix_Playing(-1) as _ }
+    }
+
+    /// Constructs the channel group.
+    pub fn new_channels(&self, len: usize) -> ChannelGroup {
+        ChannelGroup::new(self, len)
     }
 }
 
