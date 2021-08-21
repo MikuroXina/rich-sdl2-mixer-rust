@@ -105,6 +105,16 @@ impl<'device> MixMusic<'device> {
             Ok(())
         }
     }
+
+    /// Returns the volume of the music.
+    pub fn volume(&self) -> u32 {
+        unsafe { bind::Mix_VolumeMusic(-1) as _ }
+    }
+
+    /// Sets the volume of the music. The `volume` is clamped in `0..=128`.
+    pub fn set_volume(&self, volume: u32) {
+        let _ = unsafe { bind::Mix_VolumeMusic(volume.clamp(0, 128) as _) };
+    }
 }
 
 impl Drop for MixMusic<'_> {
