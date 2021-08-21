@@ -57,7 +57,8 @@ impl<'device> MixMusic<'device> {
         Self::new(device, file_name)
     }
 
-    /// Plays the music. If a music is already playing, it synchronously waits until the music ends. If `loops` is `None`, the play continues infinitely.
+    /// Plays the music. If a music is already playing, it synchronously waits until the music ends.
+    /// If `loops` is `None`, the play continues infinitely.
     pub fn play(&self, loops: Option<u32>) -> Result<()> {
         let ret = unsafe { bind::Mix_PlayMusic(self.ptr.as_ptr(), loops.map_or(-1, |n| n as _)) };
         if ret == -1 {
@@ -67,15 +68,17 @@ impl<'device> MixMusic<'device> {
         }
     }
 
-    /// Plays the music with fade-in times in milliseconds. If a music is already playing, it synchronously waits until the music ends. If `loops` is `None`, the play continues infinitely.
-    pub fn fade_in(&self, fade_in: u32, loops: Option<u32>, start: Option<f64>) -> Result<()> {
-        let start = self.music_type().convert_pos(start.unwrap_or(0.0));
+    /// Plays the music with fade-in times in milliseconds and begin times in seconds. If a music is already playing, it synchronously waits until the music ends.
+    /// If `loops` is `None`, the play continues infinitely.
+    /// If `begin` is `None`, the play begins from the start.
+    pub fn fade_in(&self, fade_in: u32, loops: Option<u32>, begin: Option<f64>) -> Result<()> {
+        let begin = self.music_type().convert_pos(begin.unwrap_or(0.0));
         let ret = unsafe {
             bind::Mix_FadeInMusicPos(
                 self.ptr.as_ptr(),
                 loops.map_or(-1, |n| n as _),
                 fade_in as _,
-                start,
+                begin,
             )
         };
         if ret == -1 {
