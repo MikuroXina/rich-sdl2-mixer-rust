@@ -126,6 +126,11 @@ impl MixDevice<'_> {
             })
             .collect()
     }
+
+    /// Returns the numbers of playing channels.
+    pub fn playing_channels(&self) -> usize {
+        unsafe { bind::Mix_Playing(-1) as _ }
+    }
 }
 
 impl Drop for MixDevice<'_> {

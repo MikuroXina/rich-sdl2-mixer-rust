@@ -6,8 +6,10 @@ use std::{marker::PhantomData, os::raw::c_int, ptr::NonNull};
 use super::MixChunk;
 use crate::{bind, device::MixDevice};
 
+pub use group::*;
 pub use pause::*;
 
+mod group;
 mod pause;
 
 /// Loops on playing in [`PlayOptions`].
@@ -51,25 +53,6 @@ pub struct PlayOptions {
 pub struct Channel<'device>(i32, PhantomData<&'device MixDevice<'device>>);
 
 impl<'device> Channel<'device> {
-    /// Allocates and returns the audio channels.
-    pub fn allocate(_device: &'device MixDevice<'device>, num: usize) -> Vec<Self> {
-        let allocated = unsafe { bind::Mix_AllocateChannels(num as _) as i32 };
-        (0..allocated).map(|id| Self(id, PhantomData)).collect()
-    }
-
-    /// Returns the first free mixing channel.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the mixing channels are not allocated. Please allocate the channels from [`Channel::allocate`] at first.
-    pub fn first_free(_device: &'device MixDevice<'device>) -> Self {
-        let allocated = unsafe { bind::Mix_AllocateChannels(-1) as i32 };
-        if allocated == 0 {
-            panic!("must allocate channels at first");
-        }
-        Self(-1, PhantomData)
-    }
-
     /// Returns the output volume of the channel. The volume is in `0..=128`.
     pub fn volume(&self) -> u32 {
         unsafe { bind::Mix_Volume(self.0, -1) as _ }
@@ -130,24 +113,9 @@ impl<'device> Channel<'device> {
         let _ = unsafe { bind::Mix_HaltChannel(self.0) };
     }
 
-    /// Halts all the playing channel.
-    pub fn halt_all(_device: &'device MixDevice<'device>) {
-        let _ = unsafe { bind::Mix_HaltChannel(-1) };
-    }
-
     /// Fade out playing on the channel in milliseconds. And returns the numbers of channels that is fading out.
     pub fn fade_out(&self, fade_out: u32) -> usize {
         unsafe { bind::Mix_FadeOutChannel(self.0, fade_out as _) as _ }
-    }
-
-    /// Fade out all the playing channel in milliseconds. And returns the numbers of channels that is fading out.
-    pub fn fade_out_all(_device: &'device MixDevice<'device>, fade_out: u32) -> usize {
-        unsafe { bind::Mix_FadeOutChannel(-1, fade_out as _) as _ }
-    }
-
-    /// Returns the numbers of playing channels.
-    pub fn playing_channels(_device: &'device MixDevice<'device>) -> usize {
-        unsafe { bind::Mix_Playing(-1) as _ }
     }
 
     /// Returns whether the channel is playing.
