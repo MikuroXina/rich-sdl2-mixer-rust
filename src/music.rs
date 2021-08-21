@@ -6,6 +6,7 @@ use std::{ffi::CString, marker::PhantomData, ptr::NonNull};
 use self::ty::MusicType;
 use crate::{bind, device::MixDevice};
 
+pub mod custom;
 pub mod ty;
 
 /// A music buffer of the audio data.
