@@ -115,6 +115,11 @@ impl<'device> MixMusic<'device> {
     pub fn set_volume(&self, volume: u32) {
         let _ = unsafe { bind::Mix_VolumeMusic(volume.clamp(0, 128) as _) };
     }
+
+    /// Rewinds the music to the beginning. Rewinding is valid only mod, ogg vorbis, mpeg-1 layer-3, and midi format.
+    pub fn rewind(&self) {
+        unsafe { bind::Mix_RewindMusic() }
+    }
 }
 
 impl Drop for MixMusic<'_> {
