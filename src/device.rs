@@ -3,7 +3,14 @@
 use rich_sdl2_rust::{audio::format::AudioFormat, Result, Sdl, SdlError};
 use std::{borrow::Cow, ffi::CStr, marker::PhantomData};
 
-use crate::{bind, chunk::channel::ChannelGroup, Mix};
+use crate::{
+    bind,
+    chunk::channel::{
+        effect::{effect_attach_done_handler, effect_attach_effect_handler, Effect},
+        ChannelGroup,
+    },
+    Mix,
+};
 
 /// A builder for [`MixDevice`].
 #[derive(Debug, Clone)]
@@ -146,6 +153,25 @@ impl MixDevice<'_> {
     /// Constructs the channel group.
     pub fn new_channels(&self, len: usize) -> ChannelGroup {
         ChannelGroup::new(self, len)
+    }
+
+    /// Attaches the effect to the special, post effect channel.
+    pub fn attach_post_effect(&self, effect: Effect) {
+        let wrapped = Box::new(effect);
+        let raw = Box::into_raw(wrapped);
+        let _ = unsafe {
+            bind::Mix_RegisterEffect(
+                bind::MIX_CHANNEL_POST,
+                Some(effect_attach_effect_handler),
+                Some(effect_attach_done_handler),
+                raw.cast(),
+            )
+        };
+    }
+
+    /// Detaches all the effect from the special, post effect channel.
+    pub fn detach_all_post_effect(&self) {
+        let _ = unsafe { bind::Mix_UnregisterAllEffects(bind::MIX_CHANNEL_POST) };
     }
 }
 

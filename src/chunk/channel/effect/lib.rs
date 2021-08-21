@@ -6,7 +6,7 @@ use super::Effect;
 use crate::device::MixDevice;
 
 /// An effect that reverses channels of left and right.
-pub fn stereo_reverse(device: &MixDevice) -> Result<Effect> {
+pub fn stereo_reverse<'device>(device: &MixDevice<'device>) -> Result<Effect<'device>> {
     // Original by Ryan C. Gordon (icculus@icculus.org) from SDL_mixer/src/effect_stereoreverse.c
     let spec = device.query();
     if spec.channels != 2 {
