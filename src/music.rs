@@ -66,6 +66,24 @@ impl<'device> MixMusic<'device> {
             Ok(())
         }
     }
+
+    /// Plays the music with fade-in times in milliseconds. If a music is already playing, it synchronously waits until the music ends. If `loops` is `None`, the play continues infinitely.
+    pub fn fade_in(&self, fade_in: u32, loops: Option<u32>, start: Option<f64>) -> Result<()> {
+        let start = self.music_type().convert_pos(start.unwrap_or(0.0));
+        let ret = unsafe {
+            bind::Mix_FadeInMusicPos(
+                self.ptr.as_ptr(),
+                loops.map_or(-1, |n| n as _),
+                fade_in as _,
+                start,
+            )
+        };
+        if ret == -1 {
+            Err(SdlError::Others { msg: Sdl::error() })
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl Drop for MixMusic<'_> {
