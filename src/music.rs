@@ -3,10 +3,11 @@
 use rich_sdl2_rust::{Result, Sdl, SdlError};
 use std::{ffi::CString, marker::PhantomData, ptr::NonNull};
 
-use self::ty::MusicType;
+use self::{pause::Pauser, ty::MusicType};
 use crate::{bind, device::MixDevice};
 
 pub mod custom;
+pub mod pause;
 pub mod ty;
 
 /// A music buffer of the audio data.
@@ -119,6 +120,11 @@ impl<'device> MixMusic<'device> {
     /// Rewinds the music to the beginning. Rewinding is valid only mod, ogg vorbis, mpeg-1 layer-3, and midi format.
     pub fn rewind(&self) {
         unsafe { bind::Mix_RewindMusic() }
+    }
+
+    /// Pauses the music until dropping the [`Pauser`].
+    pub fn pause(&'device mut self) -> Pauser<'device> {
+        Pauser::pause(self)
     }
 }
 
