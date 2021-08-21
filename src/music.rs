@@ -29,10 +29,31 @@ impl<'device> MixMusic<'device> {
             })
         }
     }
+
+    /// Constructs a music from the file with the custom player command, or `Err` on failure.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `file_name` or `command` is empty.
+    pub fn with_cmd(
+        device: &'device MixDevice<'device>,
+        file_name: &str,
+        command: &str,
+    ) -> Result<Self> {
+        let cmd_cstr = CString::new(command).expect("cmd must not be empty");
+        let ret = unsafe { bind::Mix_SetMusicCMD(cmd_cstr.as_ptr()) };
+        if ret == -1 {
+            return Err(SdlError::Others { msg: Sdl::error() });
+        }
+        Self::new(device, file_name)
+    }
 }
 
 impl Drop for MixMusic<'_> {
     fn drop(&mut self) {
-        unsafe { bind::Mix_FreeMusic(self.ptr.as_ptr()) }
+        unsafe {
+            bind::Mix_SetMusicCMD(std::ptr::null());
+            bind::Mix_FreeMusic(self.ptr.as_ptr());
+        }
     }
 }
