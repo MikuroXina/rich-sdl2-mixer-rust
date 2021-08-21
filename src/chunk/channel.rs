@@ -9,6 +9,7 @@ use crate::{bind, device::MixDevice};
 pub use group::*;
 pub use pause::*;
 
+pub mod effect;
 mod group;
 mod pause;
 
