@@ -47,6 +47,16 @@ impl<'device> MixMusic<'device> {
         }
         Self::new(device, file_name)
     }
+
+    /// Plays the music. If a music is already playing, it synchronously waits until the music ends. If `loops` is `None`, the play continues infinitely.
+    pub fn play(&self, loops: Option<u32>) -> Result<()> {
+        let ret = unsafe { bind::Mix_PlayMusic(self.ptr.as_ptr(), loops.map_or(-1, |n| n as _)) };
+        if ret == -1 {
+            Err(SdlError::Others { msg: Sdl::error() })
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl Drop for MixMusic<'_> {
