@@ -141,6 +141,11 @@ impl<'device> MixMusic<'device> {
             Ok(())
         }
     }
+
+    /// Returns whether the music is playing.
+    pub fn is_playing(&self) -> bool {
+        unsafe { bind::Mix_PlayingMusic() == 1 }
+    }
 }
 
 impl Drop for MixMusic<'_> {
