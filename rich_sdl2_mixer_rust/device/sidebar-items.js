@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MixDevice","An audio device built from [`MixDeviceBuilder`]."],["MixDeviceBuilder","A builder for [`MixDevice`]."],["MixSpec","A specification of the [`MixDevice`], returned from [`MixDevice::query`]."]]});

@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["rich_sdl2_mixer_rust"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.54.0/core/iter/traits/collect/trait.FromIterator.html\" title=\"trait core::iter::traits::collect::FromIterator\">FromIterator</a>&lt;<a class=\"struct\" href=\"rich_sdl2_mixer_rust/struct.FormatFlag.html\" title=\"struct rich_sdl2_mixer_rust::FormatFlag\">FormatFlag</a>&gt; for <a class=\"struct\" href=\"rich_sdl2_mixer_rust/struct.FormatFlag.html\" title=\"struct rich_sdl2_mixer_rust::FormatFlag\">FormatFlag</a>","synthetic":false,"types":["rich_sdl2_mixer_rust::FormatFlag"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -26,6 +26,7 @@ fn main() {
         .header("wrapper.h")
         .clang_arg("-ISDL2/include")
         .allowlist_function("Mix_.*")
+        .allowlist_function("SDL_RWFromFile")
         .allowlist_type("MIX_.*")
         .allowlist_var("MIX_.*")
         .generate_comments(false)

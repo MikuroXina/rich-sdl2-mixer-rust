@@ -1,1 +1,1 @@
-initSidebarItems({});
+initSidebarItems({"macro":[["converter","A converter between the audio format type and `f64`."],["rotate","A rotator of some speaker channels by the room angle."]],"mod":[["chunk","Audio sampling buffer controls."],["device","Audio specifications for SDL2_mixer."],["music","The music control that are suitable to background music."]],"struct":[["FormatFlag","A format flag to use on initializing of [`Mix`]."],["Mix","A root SDL2_mixer controller."]]});

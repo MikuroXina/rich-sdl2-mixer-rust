@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["channel","Channels to play a [`MixChunk`]."]],"struct":[["MixChunk","A chunk buffer of the audio data."]]});

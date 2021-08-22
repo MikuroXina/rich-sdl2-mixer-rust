@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["lib","The collection of audio effects."]],"trait":[["EffectAttachExt","An extension for attaching an effect."]],"type":[["Effect","An effect to process the audio buffer in the channel."]]});
