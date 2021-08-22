@@ -107,3 +107,18 @@ pub fn panning<'device>(
     };
     select_fn(format, args)
 }
+
+/// An effect that controls the volume decaying by the distance.
+pub fn distance<'device>(device: &MixDevice<'device>, distance: u8) -> Result<Effect<'device>> {
+    // Original by Ryan C. Gordon (icculus@icculus.org) from SDL_mixer/src/effect_position.c
+    let format = device.query();
+    // flip to scale uses
+    let distance = 255 - distance;
+    let args = PositionArgs {
+        room_angle: RoomAngle(0),
+        gains: Default::default(),
+        distance: distance.into(),
+        channels: device.query().channels,
+    };
+    select_fn(format, args)
+}
