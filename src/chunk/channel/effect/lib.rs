@@ -66,3 +66,44 @@ pub fn position<'device>(
     };
     select_fn(format, args)
 }
+
+/// An effect that controls the volume balance of left and right.
+pub fn panning<'device>(
+    device: &MixDevice<'device>,
+    left: u8,
+    right: u8,
+) -> Result<Effect<'device>> {
+    // Original by Ryan C. Gordon (icculus@icculus.org) from SDL_mixer/src/effect_position.c
+    let format = device.query();
+    let channels = format.channels;
+    if channels != 2 && channels != 4 && channels != 6 {
+        return Err(SdlError::UnsupportedFeature);
+    }
+    if 2 < channels {
+        // left = right = 255 => angle = 0, to unregister effect as when channels = 2
+        // left = 255 =>  angle = -90;  left = 0 => angle = +89
+        let mut angle = 0;
+        if left != 255 || right != 255 {
+            angle = left as i16;
+            angle = 127 - angle;
+            angle *= -1;
+            angle *= 90;
+            angle /= 128;
+        }
+        return position(device, angle, 0);
+    }
+    let args = PositionArgs {
+        room_angle: RoomAngle(0),
+        gains: [
+            left.into(),
+            right.into(),
+            0.into(),
+            0.into(),
+            0.into(),
+            0.into(),
+        ],
+        distance: 0.into(),
+        channels,
+    };
+    select_fn(format, args)
+}
