@@ -1,4 +1,6 @@
+use once_cell::sync::Lazy;
 use rich_sdl2_rust::{audio::format::AudioFormatFlag, Result, SdlError};
+use std::{collections::HashMap, sync::RwLock};
 
 use super::{Effect, PositionArgs};
 use crate::device::MixSpec;
@@ -6,8 +8,87 @@ use crate::device::MixSpec;
 mod conv;
 mod rotate;
 
-// TODO (MikuroXina): Improve u8 case with table method
+static TABLE_U8: Lazy<RwLock<HashMap<u8, HashMap<u8, u8>>>> = Lazy::new(|| {
+    let mut map = HashMap::new();
+    for volume in 0u8..=255 {
+        let mut col = HashMap::new();
+        for sample in 0u8..=255 {
+            let converted = (((sample as f64 - 128.0) * (volume as f64 / 255.0)) + 128.0) as u8;
+            col.insert(sample, converted);
+        }
+        map.insert(volume, col);
+    }
+    map.into()
+});
+
+static TABLE_I8: Lazy<RwLock<HashMap<u8, HashMap<u8, i8>>>> = Lazy::new(|| {
+    let mut map = HashMap::new();
+    for volume in 0u8..=255 {
+        let mut col = HashMap::new();
+        for sample in 0u8..=255 {
+            let converted = ((sample as f64 - 128.0) * (volume as f64 / 255.0)) as i8;
+            col.insert(sample, converted);
+        }
+        map.insert(volume, col);
+    }
+    map.into()
+});
+
 macro_rules! position {
+    (u8, 2ch, $args:ident) => {
+        Box::new(move |buf: &mut [u8]| {
+            let table = TABLE_U8.read().unwrap();
+            let mut left = table
+                .get(&((256.0 * $args.gains[0]) as u8))
+                .unwrap();
+            let mut right = table
+                .get(&((256.0 * $args.gains[1]) as u8))
+                .unwrap();
+            let distance = table
+                .get(&((256.0 * $args.distance) as u8))
+                .unwrap();
+            if $args.room_angle.0 == 180 {
+                std::mem::swap(&mut left, &mut right);
+            }
+            let left = left;
+            let right = right;
+
+            for (i, b) in buf.iter_mut().enumerate() {
+                if (i % 2 == 0) ^ cfg!(target_endian = "big"){
+                    *b = *distance.get(left.get(&*b).unwrap()).unwrap();
+                } else {
+                    *b = *distance.get(right.get(&*b).unwrap()).unwrap();
+                }
+            }
+        })
+    };
+    (i8, 2ch, $args:ident) => {
+        Box::new(move |buf: &mut [u8]| {
+            let table = TABLE_I8.read().unwrap();
+            let mut left = table
+                .get(&((256.0 * $args.gains[0]) as u8))
+                .unwrap();
+            let mut right = table
+                .get(&((256.0 * $args.gains[1]) as u8))
+                .unwrap();
+            let distance = table
+                .get(&((256.0 * $args.distance) as u8))
+                .unwrap();
+            if $args.room_angle.0 == 180 {
+                std::mem::swap(&mut left, &mut right);
+            }
+            let left = left;
+            let right = right;
+
+            for (i, b) in buf.iter_mut().enumerate() {
+                if (i % 2 == 0) ^ cfg!(target_endian = "big") {
+                    *b = distance.get(&((*left.get(&*b).unwrap() as i32 + 128) as u8)).unwrap().to_ne_bytes()[0];
+                } else {
+                    *b = distance.get(&((*right.get(&*b).unwrap() as i32 + 128) as u8)).unwrap().to_ne_bytes()[0];
+                }
+            }
+        })
+    };
     ($target:ty, 2ch, $args:ident) => {
         Box::new(move |buf: &mut [u8]| {
             buf.chunks_exact_mut(2 * std::mem::size_of::<$target>())
