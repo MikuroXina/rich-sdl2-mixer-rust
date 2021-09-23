@@ -4,6 +4,8 @@
 
 #![warn(missing_docs)]
 
+/// Rust FFI to `SDL_mixer.h`
+#[allow(warnings)]
 mod bind;
 pub mod chunk;
 pub mod device;
