@@ -77,12 +77,9 @@ fn build_vendor(repo_path: PathBuf, root_dir: &Path) {
     let build_path = repo_path.join("build");
     std::fs::create_dir(&build_path).expect("failed to mkdir build");
     assert!(
-        Command::new("cmake")
+        Command::new(repo_path.join("configure"))
             .current_dir(&build_path)
-            .args([
-                format!("-DCMAKE_INSTALL_PREFIX={}", root_dir.display()),
-                "..".to_string(),
-            ])
+            .args([format!("--prefix={}", root_dir.display())])
             .status()
             .expect("failed to configure SDL")
             .success(),
