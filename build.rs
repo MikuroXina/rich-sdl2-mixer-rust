@@ -1,62 +1,30 @@
-fn main() {
-    use git2::Repository;
-    use std::env;
-    use std::path::PathBuf;
-    use std::process;
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
+#[cfg(not(any(feature = "static", feature = "dynamic")))]
+compile_error!(r#"Either feature "static" or "dynamic" must be enabled."#);
+
+#[cfg(all(feature = "static", feature = "dynamic"))]
+compile_error!(r#"Feature "static" and "dynamic" cannot coexist."#);
+
+fn main() {
     let root_dir = env::var("OUT_DIR").expect("OUT_DIR not found");
     let root = PathBuf::from(&root_dir);
 
-    let sdl_dir = root.join("SDL2");
-    let _ = Repository::clone("https://github.com/libsdl-org/SDL", &sdl_dir);
-    let _ = process::Command::new("./configure")
-        .arg(format!("--prefix={}", root_dir))
-        .current_dir(&sdl_dir)
-        .output()
-        .expect("failed to configure");
-    let _ = process::Command::new("make")
-        .arg("-j4")
-        .current_dir(&sdl_dir)
-        .output()
-        .expect("failed to make");
-    let _ = process::Command::new("make")
-        .arg("install")
-        .current_dir(&sdl_dir)
-        .output()
-        .expect("failed to install");
+    let includes: Vec<_> = include_paths()
+        .map(|path| format!("-I{}", path.display()))
+        .collect();
+    eprintln!("{:?}", includes);
 
-    let sdl_mixer_dir = root.join("SDL2_mixer");
-    let _ = Repository::clone("https://github.com/libsdl-org/SDL_mixer", &sdl_mixer_dir);
-    let _ = process::Command::new("./configure")
-        .arg(format!("--prefix={}", root_dir))
-        .current_dir(&sdl_mixer_dir)
-        .env("SDL2_DIR", &sdl_dir)
-        .output()
-        .expect("failed to configure");
-    let _ = process::Command::new("make")
-        .arg("-j4")
-        .current_dir(&sdl_mixer_dir)
-        .output()
-        .expect("failed to make");
+    set_link();
 
-    println!("cargo:rustc-link-lib=SDL2");
-    println!("cargo:rustc-link-lib=SDL2_mixer");
-    println!(
-        "cargo:rustc-link-search={}",
-        root.join("SDL2/build/.libs").as_path().to_string_lossy()
-    );
-    println!(
-        "cargo:rustc-link-search={}",
-        root.join("SDL2_mixer/build/.libs")
-            .as_path()
-            .to_string_lossy()
-    );
     println!("cargo:rerun-if-changed=wrapper.h");
 
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
-        .clang_arg(&format!("-I{}/SDL2/include", root_dir))
-        .clang_arg(&format!("-I{}/SDL2_mixer/include", root_dir))
+        .clang_args(includes)
         .allowlist_function("Mix_.*")
         .allowlist_function("SDL_RWFromFile")
         .allowlist_type("MIX_.*")
@@ -69,4 +37,70 @@ fn main() {
     bindings
         .write_to_file(root.join("bind.rs"))
         .expect("`src` directory not found");
+}
+
+fn include_paths() -> impl Iterator<Item = PathBuf> {
+    let vendor_include = if cfg!(feature = "vendor") {
+        let root_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not found"));
+
+        // setup vendored
+        let repo_path = root_dir.join("SDL_mixer");
+        let lib_dir = repo_path.join("build");
+        let include_dir = repo_path.join("include");
+        if !repo_path.is_dir() {
+            build_vendor(repo_path, &root_dir);
+        }
+        println!("cargo:rustc-link-search={}", lib_dir.display());
+        eprintln!("vendored SDL: {}", root_dir.display());
+        vec![include_dir]
+    } else {
+        vec![]
+    };
+    pkg_config::Config::new()
+        .atleast_version("2.0.4")
+        .probe("sdl2_mixer")
+        .into_iter()
+        .flat_map(|sdl2_mixer| sdl2_mixer.include_paths)
+        .chain(
+            std::env::var("SDL2_MIXER_PATH")
+                .map(PathBuf::from)
+                .into_iter(),
+        )
+        .chain(vendor_include.into_iter())
+}
+
+fn build_vendor(repo_path: PathBuf, root_dir: &Path) {
+    use git2::Repository;
+    use std::process::Command;
+
+    let _ = Repository::clone("https://github.com/libsdl-org/SDL_mixer", &repo_path);
+    let build_path = repo_path.join("build");
+    std::fs::create_dir(&build_path).expect("failed to mkdir build");
+    assert!(
+        Command::new("cmake")
+            .current_dir(&build_path)
+            .args([
+                format!("-DCMAKE_INSTALL_PREFIX={}", root_dir.display()),
+                "..".to_string(),
+            ])
+            .status()
+            .expect("failed to configure SDL")
+            .success(),
+        "cmake failed"
+    );
+    assert!(
+        Command::new("make")
+            .current_dir(&build_path)
+            .status()
+            .expect("failed to build SDL")
+            .success(),
+        "build failed"
+    );
+}
+
+fn set_link() {
+    #[cfg(feature = "static")]
+    println!("cargo:rustc-link-lib=static=SDL2_mixer");
+    #[cfg(feature = "dynamic")]
+    println!("cargo:rustc-link-lib=dylib=SDL2_mixer");
 }
