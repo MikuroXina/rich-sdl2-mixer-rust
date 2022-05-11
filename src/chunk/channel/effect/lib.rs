@@ -40,7 +40,6 @@ struct PositionArgs {
     room_angle: RoomAngle,
     gains: [Gain; 6],
     distance: Gain,
-    channels: u32,
 }
 
 /// An effect that controls the playing position.
@@ -62,7 +61,6 @@ pub fn position<'device>(
         room_angle,
         gains,
         distance: distance.into(),
-        channels,
     };
     select_fn(format, args)
 }
@@ -103,7 +101,6 @@ pub fn panning<'device>(
             0.into(),
         ],
         distance: 0.into(),
-        channels,
     };
     select_fn(format, args)
 }
@@ -118,7 +115,6 @@ pub fn distance<'device>(device: &MixDevice<'device>, distance: u8) -> Result<Ef
         room_angle: RoomAngle(0),
         gains: Default::default(),
         distance: distance.into(),
-        channels: device.query().channels,
     };
     select_fn(format, args)
 }
